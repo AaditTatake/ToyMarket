@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from pathlib import Path
 from simulator import simulate_market
 from indicators import add_indicators
 from propositions import build_propositions, clean_indicator_warmup
@@ -75,31 +76,52 @@ def make_sample_table(df: pd.DataFrame, n_rows: int = 12) -> pd.DataFrame:
 
 
 def plot_results(df: pd.DataFrame, title_suffix: str) -> None:
+    x = df.index.to_list()
+
     fig, axes = plt.subplots(3, 1, figsize=(11, 9), sharex=True)
 
     # Price + SMAs
-    axes[0].plot(df.index, df["Close"], label="Close")
-    axes[0].plot(df.index, df["SMA_short"], label="Short SMA")
-    axes[0].plot(df.index, df["SMA_long"], label="Long SMA")
+    axes[0].plot(x, df["Close"].to_numpy(), label="Close")
+    axes[0].plot(x, df["SMA_short"].to_numpy(), label="Short SMA")
+    axes[0].plot(x, df["SMA_long"].to_numpy(), label="Long SMA")
     axes[0].set_title(f"Simulated Price and SMAs ({title_suffix})")
     axes[0].legend()
 
     # RSI
-    axes[1].plot(df.index, df["RSI"], label="RSI")
+    axes[1].plot(x, df["RSI"].to_numpy(), label="RSI")
     axes[1].axhline(30, linestyle="--")
     axes[1].axhline(70, linestyle="--")
     axes[1].set_title("RSI")
     axes[1].legend()
 
     # MACD
-    axes[2].plot(df.index, df["MACD"], label="MACD")
-    axes[2].plot(df.index, df["MACD_signal"], label="Signal")
+    axes[2].plot(x, df["MACD"].to_numpy(), label="MACD")
+    axes[2].plot(x, df["MACD_signal"].to_numpy(), label="Signal")
     axes[2].set_title("MACD")
     axes[2].legend()
 
     plt.tight_layout()
     plt.show()
 
+def make_output_dir() -> Path:
+    out_dir = Path("outputs") / "tables"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    return out_dir
+
+
+def save_summary_csv(summary: dict[str, int], out_dir: Path, prefix: str) -> None:
+    summary_df = pd.DataFrame(
+        {"metric": list(summary.keys()), "value": list(summary.values())}
+    )
+    summary_df.to_csv(out_dir / f"{prefix}_summary.csv", index=False)
+
+
+def save_sample_table_csv(sample: pd.DataFrame, out_dir: Path, prefix: str) -> None:
+    sample.to_csv(out_dir / f"{prefix}_sample_table.csv")
+
+
+def save_full_results_csv(df: pd.DataFrame, out_dir: Path, prefix: str) -> None:
+    df.to_csv(out_dir / f"{prefix}_full_results.csv")
 
 def main() -> None:
     params = get_user_inputs()
@@ -140,6 +162,19 @@ def main() -> None:
     sample = make_sample_table(df, n_rows=12)
     pd.set_option("display.max_columns", None)
     print(sample)
+
+    # Save outputs
+    out_dir = make_output_dir()
+    prefix = f"{params['regime']}_{params['n_days']}d_seed{params['seed']}"
+
+    save_summary_csv(summary, out_dir, prefix)
+    save_sample_table_csv(sample, out_dir, prefix)
+    save_full_results_csv(df, out_dir, prefix)
+
+    print(f"\nSaved CSV files to: {out_dir.resolve()}")
+    print(f"- {prefix}_summary.csv")
+    print(f"- {prefix}_sample_table.csv")
+    print(f"- {prefix}_full_results.csv")
 
     plot_results(df, title_suffix=params["regime"])
 

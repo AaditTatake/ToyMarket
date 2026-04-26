@@ -135,4 +135,3 @@ This repository is intended to support the following tasks:
 - [ ] plots of simulated price and signal behavior
 
 ---
-    └── final_report.tex

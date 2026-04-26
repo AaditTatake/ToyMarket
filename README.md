@@ -1,6 +1,6 @@
 # A Propositional Logic Analysis of Rule-Based Trading Signals
 
-This repository contains the code and supporting material for a project in **MA 385 (Mathematical Logic)**. The project studies how **propositional logic** can be used to model, analyze, and compare simple rule-based trading systems.
+This repository contains the code and supporting material for my final project in **MA 385 (Mathematical Logic)**. The project studies how **propositional logic** can be used to model, analyze, and compare simple rule-based trading systems.
 
 The central idea is to encode common technical-analysis conditions as Boolean propositions and use them to construct two signal systems:
 
@@ -135,22 +135,4 @@ This repository is intended to support the following tasks:
 - [ ] plots of simulated price and signal behavior
 
 ---
-
-## Proposed Repository Structure
-
-```text
-.
-├── README.md
-├── src/
-│   ├── simulator.py
-│   ├── indicators.py
-│   ├── propositions.py
-│   ├── logic_models.py
-│   └── main.py
-├── notebooks/
-│   └── exploration.ipynb
-├── outputs/
-│   ├── figures/
-│   └── tables/
-└── paper/
     └── final_report.tex

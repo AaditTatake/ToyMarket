@@ -1,35 +1,34 @@
 # A Propositional Logic Analysis of Rule-Based Trading Signals
 
-This repository contains the code and supporting material for a project in **MA 385 (Mathematical Logic)** exploring how **propositional logic** can be used to model and analyze a simple rule-based trading system.
+This repository contains the code and supporting material for a project in **MA 385 (Mathematical Logic)**. The project studies how **propositional logic** can be used to model, analyze, and compare simple rule-based trading systems.
 
-The central idea is to represent common technical-analysis conditions as Boolean propositions and then use those propositions to construct and compare two trading systems:
+The central idea is to encode common technical-analysis conditions as Boolean propositions and use them to construct two signal systems:
 
 - a **naive** rule-based system
 - a **refined** rule-based system designed to reduce contradictory outputs
 
-The project is **not** intended to predict market performance or serve as a realistic trading strategy. Instead, it studies how logical structure affects the behavior of a simple decision system inspired by trading.
+This project is **not** intended to predict market performance or function as a realistic trading strategy. Its purpose is to study how logical structure affects the behavior of a simplified decision system inspired by trading.
 
 ---
 
 ## Project Overview
 
-This project models trading decisions using six propositional variables:
+The model uses six propositional variables:
 
-- **P**: closing price is above the 20-day SMA  
-- **M**: 5-day SMA is above the 20-day SMA  
-- **V**: trading volume is above its 20-day average  
-- **R**: RSI is below 30  
-- **O**: RSI is above 70  
-- **D**: MACD line is above the signal line  
+- **P**: closing price is above the 20-day simple moving average
+- **M**: 5-day simple moving average is above the 20-day simple moving average
+- **V**: trading volume is above its 20-day average
+- **R**: RSI is below 30
+- **O**: RSI is above 70
+- **D**: MACD line is above the signal line
 
-These variables are used to encode ideas from technical analysis such as:
+These variables are used to encode three common ideas from technical analysis:
 
 - **trend**
 - **momentum**
-- **volume confirmation**
-- **mean reversion**
+- **confirmation**
 
-The repository also includes a **market simulator** that generates synthetic price and volume data under different market regimes, computes technical indicators from that data, converts them into propositional variables, and evaluates the naive and refined trading systems.
+The repository also includes a **market simulator** that generates synthetic price and volume data under different market regimes, computes the relevant indicators, converts them into propositional variables, and evaluates both logical systems.
 
 ---
 
@@ -39,7 +38,7 @@ The main question of the project is:
 
 > **Can propositional logic be used to formalize, analyze, and improve a simple rule-based trading decision system?**
 
-More specifically, the project studies:
+More specifically, the project investigates:
 
 - whether the naive system is logically coherent
 - whether it can produce conflicting outputs
@@ -54,39 +53,60 @@ More specifically, the project studies:
 
 The initial trading rules are:
 
-\[
+$$
 B_0 = (P \land M \land D)\lor(R \land V)
-\]
+$$
 
-\[
+$$
 S_0 = (\neg P \land \neg M \land \neg D)\lor(O \land V)
-\]
+$$
 
-\[
+$$
 H_0 = \neg B_0 \land \neg S_0
-\]
+$$
 
 where:
 
-- \(B_0\) = buy
-- \(S_0\) = sell
-- \(H_0\) = hold
+- $B_0$ = buy
+- $S_0$ = sell
+- $H_0$ = hold
 
 ### Refined System
 
-The refined system adds simple guardrails to reduce contradiction:
+The refined system adds simple guardrails to reduce contradictory outcomes:
 
-\[
+$$
 B_1 = \big((P \land M \land D)\lor(R \land V)\big)\land \neg O
-\]
+$$
 
-\[
+$$
 S_1 = \big((\neg P \land \neg M \land \neg D)\lor(O \land V)\big)\land \neg R
-\]
+$$
 
-\[
+$$
 H_1 = \neg B_1 \land \neg S_1
-\]
+$$
+
+---
+
+## Simulator Overview
+
+The simulator generates synthetic market data rather than using live or historical prices. This allows the logical systems to be tested in a controlled environment.
+
+At a high level, the simulator will:
+
+1. generate synthetic **price** and **volume** data
+2. compute technical indicators from that data
+3. convert indicator values into Boolean propositions
+4. evaluate the naive and refined systems
+5. compare their outputs
+
+The simulator is intended to support multiple market regimes, such as:
+
+- **bullish**
+- **bearish**
+- **sideways**
+- **high-volatility**
 
 ---
 
@@ -128,7 +148,7 @@ This repository is intended to support the following tasks:
 │   ├── logic_models.py
 │   └── main.py
 ├── notebooks/
-│   └── exploratory_analysis.ipynb
+│   └── exploration.ipynb
 ├── outputs/
 │   ├── figures/
 │   └── tables/

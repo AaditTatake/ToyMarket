@@ -1,137 +1,480 @@
 # A Propositional Logic Analysis of Rule-Based Trading Signals
 
-This repository contains the code and supporting material for my final project in **MA 385 (Mathematical Logic)**. The project studies how **propositional logic** can be used to model, analyze, and compare simple rule-based trading systems.
+This repository contains the Python program used for my MA 385 final project, **A Propositional Logic Analysis of Rule-Based Trading Signals**.
 
-The central idea is to encode common technical-analysis conditions as Boolean propositions and use them to construct two signal systems:
+The program uses a simplified trading-signal model as an example of a rule-based decision system. It generates simulated market data, computes technical indicators, converts those indicators into propositional variables, and then compares two logical trading systems:
 
-- a **naive** rule-based system
-- a **refined** rule-based system designed to reduce contradictory outputs
+1. a **naive system**, which can sometimes produce contradictory outputs, and  
+2. a **refined system**, which adds logical restrictions to remove those contradictions.
 
-This project is **not** intended to predict market performance or function as a realistic trading strategy. Its purpose is to study how logical structure affects the behavior of a simplified decision system inspired by trading.
-
----
-
-## Project Overview
-
-The model uses six propositional variables:
-
-- **P**: closing price is above the 20-day simple moving average
-- **M**: 5-day simple moving average is above the 20-day simple moving average
-- **V**: trading volume is above its 20-day average
-- **R**: RSI is below 30
-- **O**: RSI is above 70
-- **D**: MACD line is above the signal line
-
-These variables are used to encode three common ideas from technical analysis:
-
-- **trend**
-- **momentum**
-- **confirmation**
-
-The repository also includes a **market simulator** that generates synthetic price and volume data under different market regimes, computes the relevant indicators, converts them into propositional variables, and evaluates both logical systems.
+This project is **not financial advice** and is not intended to predict real market behavior. The purpose is to study how propositional logic can be used to model, analyze, and improve a structured decision system.
 
 ---
 
-## Research Goal
+## How to Run the Program
 
-The main question of the project is:
+First, install the required packages:
 
-> **Can propositional logic be used to formalize, analyze, and improve a simple rule-based trading decision system?**
+```bash
+pip install -r requirements.txt
+```
 
-More specifically, the project investigates:
+Then run the program from the project folder:
 
-- whether the naive system is logically coherent
-- whether it can produce conflicting outputs
-- whether a refined version behaves more consistently
-- how both systems behave under simulated market conditions
+```bash
+python main.py
+```
+
+The program is interactive. It will ask you to enter several parameters for the simulation. If you want to use the default value for a parameter, just press **Enter**.
+
+Example:
+
+```text
+=== Rule-Based Trading Signal Simulator ===
+Choose regime [bull / bear / sideways / volatile] (default: sideways):
+Number of days (default: 250):
+Starting price (default: 100):
+Base volume (default: 1000000):
+Short SMA window (default: 5):
+Long SMA window (default: 20):
+RSI lower threshold (default: 30):
+RSI upper threshold (default: 70):
+Random seed (default: 42):
+```
+
+If you press **Enter** for every prompt, the program will run the default simulation.
 
 ---
 
-## Trading Systems
+## What Each Parameter Means
+
+### `regime`
+
+This controls the type of synthetic market being simulated.
+
+The available choices are:
+
+```text
+bull
+bear
+sideways
+volatile
+```
+
+Use `bull` to simulate a market with an upward drift.
+
+Use `bear` to simulate a market with a downward drift.
+
+Use `sideways` to simulate a market with no strong upward or downward trend.
+
+Use `volatile` to simulate a market with larger price swings.
+
+The default value is:
+
+```text
+sideways
+```
+
+---
+
+### `n_days`
+
+This is the number of business days to simulate.
+
+The default value is:
+
+```text
+250
+```
+
+The simulator requires at least 50 days because the technical indicators need enough data before they become meaningful. For example, a 20-day moving average cannot be computed properly until enough prior prices exist.
+
+---
+
+### `start_price`
+
+This is the starting price of the simulated asset.
+
+The default value is:
+
+```text
+100
+```
+
+For example, if the starting price is 100, the simulated price series begins at 100 and then evolves according to the chosen market regime.
+
+---
+
+### `base_volume`
+
+This is the typical trading volume around which the program generates simulated volume data.
+
+The default value is:
+
+```text
+1000000
+```
+
+The simulator does not keep volume perfectly constant. It adds random variation and occasional volume spikes, which allows the model to test whether volume is above or below its moving average.
+
+---
+
+### `short_sma`
+
+This is the window length for the short simple moving average.
+
+The default value is:
+
+```text
+5
+```
+
+The short SMA is used to represent shorter-term price movement. In this project, it is compared against the long SMA to help determine whether the market has positive trend alignment.
+
+It is used in the proposition:
+
+```text
+M = short SMA is above long SMA
+```
+
+---
+
+### `long_sma`
+
+This is the window length for the long simple moving average.
+
+The default value is:
+
+```text
+20
+```
+
+The long SMA is used as the main trend baseline. The program checks whether the current closing price is above this long SMA.
+
+It is used in the propositions:
+
+```text
+P = closing price is above long SMA
+M = short SMA is above long SMA
+```
+
+The program also uses this same window length when computing average volume.
+
+---
+
+### `rsi_low`
+
+This is the lower RSI threshold.
+
+The default value is:
+
+```text
+30
+```
+
+The RSI, or relative strength index, is a momentum indicator. In this project, a low RSI value represents an oversold condition.
+
+The parameter `rsi_low` is used in the proposition:
+
+```text
+R = RSI is below rsi_low
+```
+
+With the default value, this means:
+
+```text
+R = RSI is below 30
+```
+
+---
+
+### `rsi_high`
+
+This is the upper RSI threshold.
+
+The default value is:
+
+```text
+70
+```
+
+A high RSI value represents an overbought condition.
+
+The parameter `rsi_high` is used in the proposition:
+
+```text
+O = RSI is above rsi_high
+```
+
+With the default value, this means:
+
+```text
+O = RSI is above 70
+```
+
+---
+
+### `seed`
+
+This is the random seed used by the simulator.
+
+The default value is:
+
+```text
+42
+```
+
+The seed controls the random numbers used to generate the simulated market data. If you use the same seed with the same parameters, you should get the same simulated data again. If you change the seed, the program will generate a different simulated market path.
+
+---
+
+## Propositional Variables
+
+After generating the simulated market data and computing the indicators, the program converts each trading day into six propositional variables.
+
+| Variable | Meaning |
+|---|---|
+| `P` | Closing price is above the long SMA |
+| `M` | Short SMA is above the long SMA |
+| `V` | Volume is above its moving average |
+| `R` | RSI is below the lower threshold |
+| `O` | RSI is above the upper threshold |
+| `D` | MACD line is above the MACD signal line |
+
+Each variable is either `True` or `False` for each simulated trading day.
+
+---
+
+## Logical Trading Systems
+
+The program compares two systems: a naive system and a refined system.
+
+---
 
 ### Naive System
 
-The initial trading rules are:
+The naive buy rule is:
 
-$$
-B_0 = (P \land M \land D)\lor(R \land V)
-$$
+```text
+B0 = (P and M and D) or (R and V)
+```
 
-$$
-S_0 = (\neg P \land \neg M \land \neg D)\lor(O \land V)
-$$
+This means the system buys if either:
 
-$$
-H_0 = \neg B_0 \land \neg S_0
-$$
+1. price, moving averages, and MACD all show bullish trend behavior, or  
+2. RSI is oversold and volume is elevated.
 
-where:
+The naive sell rule is:
 
-- $B_0$ = buy
-- $S_0$ = sell
-- $H_0$ = hold
+```text
+S0 = (not P and not M and not D) or (O and V)
+```
+
+This means the system sells if either:
+
+1. price, moving averages, and MACD all show bearish behavior, or  
+2. RSI is overbought and volume is elevated.
+
+The naive hold rule is:
+
+```text
+H0 = not B0 and not S0
+```
+
+This means the system holds only when neither the buy rule nor the sell rule is true.
+
+The possible problem with the naive system is that `B0` and `S0` can both be true on the same day. That creates a logical conflict: the model is simultaneously saying to buy and sell.
+
+The program records this with:
+
+```text
+Conflict0 = B0 and S0
+```
+
+---
 
 ### Refined System
 
-The refined system adds simple guardrails to reduce contradictory outcomes:
+The refined system modifies the naive system by adding simple logical guardrails.
 
-$$
-B_1 = \big((P \land M \land D)\lor(R \land V)\big)\land \neg O
-$$
+The refined buy rule is:
 
-$$
-S_1 = \big((\neg P \land \neg M \land \neg D)\lor(O \land V)\big)\land \neg R
-$$
+```text
+B1 = ((P and M and D) or (R and V)) and not O
+```
 
-$$
-H_1 = \neg B_1 \land \neg S_1
-$$
+This means the refined system will not issue a buy signal if the market is also classified as overbought.
 
----
+The refined sell rule is:
 
-## Simulator Overview
+```text
+S1 = ((not P and not M and not D) or (O and V)) and not R
+```
 
-The simulator generates synthetic market data rather than using live or historical prices. This allows the logical systems to be tested in a controlled environment.
+This means the refined system will not issue a sell signal if the market is also classified as oversold.
 
-At a high level, the simulator will:
+The refined hold rule is:
 
-1. generate synthetic **price** and **volume** data
-2. compute technical indicators from that data
-3. convert indicator values into Boolean propositions
-4. evaluate the naive and refined systems
-5. compare their outputs
+```text
+H1 = not B1 and not S1
+```
 
-The simulator is intended to support multiple market regimes, such as:
+The refined system is designed to remove the most obvious buy/sell contradictions.
 
-- **bullish**
-- **bearish**
-- **sideways**
-- **high-volatility**
+The program records refined-system conflicts with:
 
----
+```text
+Conflict1 = B1 and S1
+```
 
-## Repository Goals
-
-This repository is intended to support the following tasks:
-
-- simulate synthetic market data
-- compute technical indicators from that data
-- map indicator values to propositional variables
-- evaluate naive and refined trading systems
-- compare the outputs of the two systems
-- study logical behavior such as satisfiability and contradiction
+Ideally, the refined system should produce zero conflicts.
 
 ---
 
-## Planned Features
+## Program Output
 
-- [ ] price and volume simulator
-- [ ] bullish / bearish / sideways market regimes
-- [ ] SMA, RSI, and MACD computation
-- [ ] propositional-variable construction
-- [ ] naive-system evaluation
-- [ ] refined-system evaluation
-- [ ] summary statistics for buy / sell / hold / conflict counts
-- [ ] plots of simulated price and signal behavior
+After the simulation runs, the program prints two main things:
+
+1. an output summary, and  
+2. a sample table showing the last 12 rows of the simulation.
+
+The output summary reports counts for:
+
+```text
+B0_buy_count
+S0_sell_count
+H0_hold_count
+Conflict0_count
+B1_buy_count
+S1_sell_count
+H1_hold_count
+Conflict1_count
+```
+
+These counts show how many times each system produced buy, sell, hold, or conflict outputs.
 
 ---
+
+## Saved CSV Files
+
+The program saves CSV files in:
+
+```text
+outputs/tables/
+```
+
+For example, if you run a sideways simulation with 250 days and seed 42, the output files will be named:
+
+```text
+sideways_250d_seed42_summary.csv
+sideways_250d_seed42_sample_table.csv
+sideways_250d_seed42_full_results.csv
+```
+
+### Summary CSV
+
+The summary CSV contains the total output counts for the naive and refined systems.
+
+### Sample Table CSV
+
+The sample table CSV contains the last 12 rows of the simulation, including prices, indicators, propositions, and logical outputs.
+
+### Full Results CSV
+
+The full results CSV contains every simulated row, including:
+
+- generated market data,
+- computed indicators,
+- propositional variables,
+- naive-system outputs,
+- refined-system outputs.
+
+---
+
+## Plot
+
+At the end of the program, a plot window opens with three panels:
+
+1. simulated closing price with short and long SMAs,
+2. RSI with threshold lines,
+3. MACD and MACD signal line.
+
+This plot helps visualize the simulated data that produced the logical outputs.
+
+If the program seems paused at the end, close the plot window. The program may not fully exit until the plot window is closed.
+
+---
+
+## File Overview
+
+### `main.py`
+
+Runs the full program. It asks for user inputs, calls the simulator, computes indicators, builds propositions, evaluates both logical systems, saves CSV files, and displays the plot.
+
+### `simulator.py`
+
+Generates synthetic OHLCV market data. OHLCV means:
+
+```text
+Open, High, Low, Close, Volume
+```
+
+The simulated price data is generated using random log returns based on the chosen market regime.
+
+### `indicators.py`
+
+Computes the technical indicators used by the model:
+
+- simple moving averages,
+- RSI,
+- exponential moving averages,
+- MACD,
+- MACD signal line,
+- MACD histogram.
+
+### `propositions.py`
+
+Converts the indicator values into Boolean propositional variables:
+
+```text
+P, M, V, R, O, D
+```
+
+It also removes early rows where indicators are not ready yet.
+
+### `logic_models.py`
+
+Evaluates the naive and refined logical trading systems.
+
+It also summarizes the output counts for buy, sell, hold, and conflict conditions.
+
+### `requirements.txt`
+
+Lists the Python packages needed to run the project.
+
+---
+
+## Typical Runs Used for the Project
+
+For the project writeup, the main simulations used:
+
+```text
+n_days: 250
+start_price: 100
+base_volume: 1000000
+short_sma: 5
+long_sma: 20
+rsi_low: 30
+rsi_high: 70
+seed: 42
+```
+
+The regimes compared were:
+
+```text
+bull
+sideways
+volatile
+```
+
+To reproduce those results, run the program once for each of those regimes while keeping the other parameters the same.
